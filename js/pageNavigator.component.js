@@ -1,6 +1,6 @@
 define(['jquery','eventEmitter'],function($, EventEmitter){
 
-	function pageNavaigator(element){
+	function pageNavaigator(element, max){
 
 		this.ee = new EventEmitter();
 		this.pageNavaigator = $(element);
@@ -11,7 +11,6 @@ define(['jquery','eventEmitter'],function($, EventEmitter){
 		this.nextArrow;
 		this.init();
 	}
-
 
 	pageNavaigator.prototype = {
 
@@ -44,6 +43,10 @@ define(['jquery','eventEmitter'],function($, EventEmitter){
 
 		    this.addSelected(e);
 		    this.checkArrow(this.selectedPage.find('a').text());
+		    this.ee.emit('change', {
+		      "index": this.selectedPage.find('a').text(),
+		      "max": max,
+		    });
 		},
 
 		addSelected : function (e) {
