@@ -1,6 +1,5 @@
 define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, template, todo) {
     var countedList;
-    var noTask;
     var lastPage;
     var url = "http://128.199.76.9:8002/:JunnieJobs/";
 
@@ -14,9 +13,8 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
 
         }).done(function (data,status) {
 
-            countedList = data.cnt;
-            lastPage = countPages(countedList);
-            showPages(lastPage);
+            $(".todo-count > strong").text(data.cnt);
+            showPages(countPages(data.cnt));
             pageViewResolver();
 
         });
@@ -28,48 +26,64 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
         
         if (countedList === 0) {
             endPage = 1;
-        }else if (countedList % 5 === 0){
-            endPage = countedList/5;
+        }else if (countedList % 3 === 0){
+            endPage = countedList/3;
         }else{
-            endPage = parseInt(countedList/5) +1;
+            endPage = parseInt(countedList/3) +1;
         }
+
+        lastPage = endPage;
         return endPage;
     }
     
     function showPages(endPage) {
+
         var pages = [];
-        var pageCount;
 
-        if(lastPage > 5){
-            pageCount = 5;
-        }else{
-            pageCount = lastPage;
-        }
-
-        for(var i=0; i<lastPage; i++){
+        if(endPage <= 5){
+            for(var i=1; i<=endPage; i++){
              pages.push(i);
+         }
+        }else{
+            for(var i=1; i<=5; i++){
+                pages.push(i);
+            }
+            // $("#next").text(">>");
         }
-        $("#next").before(template.pageList({
-            "pages":pages
-        }));
+        
+        $("#prev").after(template.pageList({
+                "pages":pages
+         })); 
+           
+    }
 
-        if( $(".pageNavaigator li").text() == 1){
-            $(".pageNavaigator li").addClass("selected");
-        }     
+    function deafualtSelected() {
+        $(".pageNavigator li:contains('1')").addClass("selected");
     }
  
-    function pageViewResolver(){
-        var pageNum = $(".selected a").text();
+    //카운트를 세고 페이지 인덱스를 만들어준다.
+    function pageViewResolver(Idx){
+
+        var pageNum;
+        if(!Idx){
+            pageNum = 1;
+            deafualtSelected();
+        }else{
+            pageNum = Idx;
+        }
+        
         var start = (pageNum-1) * 3 ;
         var limit = 3;
+
         $.ajax({
 
             url: url + "page",
-            data: { start: start, limit : limit},
+            data: { "start": start, "limit" : 3},
             type: "get"
 
         }).done(function (data,status) {
-            todo.loadAllTodoList();
+            $(".todo-list li").remove();
+            todo.loadAllTodoList(data);
         }).fail(function (status) {
             alert(status);
         });
@@ -79,7 +93,8 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
         e.preventDefault();
         $(".selected").removeClass("selected");
         $(e.currentTarget).addClass("selected");
-        pageViewResolver();
+        var Idx = $(e.target).text();
+        pageViewResolver(Idx);
     }
 
     function clickPrev(e) {
@@ -87,36 +102,115 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
         var firstPage = 1;
         var clikedPage = $(".selected a").text();
 
-        if(clikedPage != firstPage){
-            clickPrevAndNextFilter();
-        }else{
+        if(clikedPage == firstPage){
             $("#prev").addClass("disabled");
+            return;
         }
+
+        if(clikedPage%5 === 1){
+            $(".pageIndex").remove();
+
+            var pages = [];
+
+            for(var i=clikedPage-5; i <= clikedPage-1; i++){
+                    pages.push(i);
+            }
+
+            $("#prev").after(template.pageList({
+                "pages":pages
+            }))
+
+            clickPrevResolver(clikedPage);
+        }
+
+      
+            clickPrevResolver(clikedPage);
+    
+     
+
+        // if(clikedPage <= 5 ){  
+        //     clickPrevResolver(clikedPage);
+        // }
+         
+
+        // if(clikedPage > 5 && clikedPage%5 === 1){
+
+        //     clickPrevResolver(clikedPage)
+        // }     
+    }
+
+    function clickPrevResolver(clikedPage){
+        var newPage = clikedPage-1;
+        $(".selected").removeClass("selected");
+        $("#next").removeClass("disabled");
+        $(".pageNavigator").find("li").eq(newPage).addClass("selected");
+        pageViewResolver(newPage);
     }
 
     function clickNext(e) {
         e.preventDefault();
-        var clikedPage = $(".selected a").text();
-        if(clikedPage != lastPage){
-           clickPrevAndNextFilter();
-        }else{
+        var clikedPage = parseInt($(".selected").text());
+
+        if(clikedPage === lastPage){
             $("#next").addClass("disabled");
+             $("#next").text("");
+            console.log("마지막 페이지입니다.");
+            return;
+        }
+        if(clikedPage%5 == 0 && lastPage-clikedPage < 5){
+            console.log("여기");
+            var newPage = clikedPage+1;
+            console.log(newPage);
+
+            $(".pageNavigator li:not(#prev):not(#next)").remove();
+            $("#prev").text("<<");
+
+            if(lastPage > clikedPage*2){
+                $("#next").text(">>");
+            }
+         
+            var pages=[];
+            for(var i = newPage; i<=lastPage; i++){
+                pages.push(i);
+            } 
+            $("#prev").after(template.pageList({
+                  "pages":pages
+             })); 
+            clickNextResolver(newPage);
+            return;
+        }else{
+             var newPage = clikedPage+1;
+            clickNextResolver(newPage);
+            return;
         }
     }
+    
 
-    function clickPrevAndNextFilter(clikedPage){
+    function clickNextResolver(newPage){
 
-            var newPage = clikedPage+1;
-            $(".selected").removeClass("selected");
-            $("#next").removeClass("disabled");
-            $(".pagination").find("li").eq(newPage).addClass("selected");
+        console.log("여기서 bewPage" + newPage);
+        $(".selected").removeClass("selected");
+        $("#prev").removeClass("disabled");
+         // var a = $(".pageNavigator").find(".pageIndex").first().text();
+        
+        if(newPage > 5 && newPage%5 === 1 ){
+            $(".pageNavigator").find("li:nth-child(2)").addClass("selected");
+        }else{
+             $(".pageNavigator").find("li").eq(newPage).addClass("selected");
+        }
+
+         // $(".pageNavigator").find("li").eq(newPage).addClass("selected");
+       
+
+       
+        pageViewResolver(newPage);
     }
 
     function init() {
         getCountedList();
-        $(".pagination").on("click","li:not(#prev):not(#next)",movePage);
-        $(".pagination").on("click","#prev", clickPrev);
-        $(".pagination").on("click","#next", clickNext);
+        $(".pageNavigator").on("click","li:not(#prev):not(#next)", movePage);
+        $(".pageNavigator").on("click","#prev", clickPrev);
+        $(".pageNavigator").on("click","#next", clickNext);
     };
     return {
         "init":init
