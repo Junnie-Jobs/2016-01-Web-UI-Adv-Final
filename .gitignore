@@ -1,0 +1,12 @@
+node_modules/
+bower_components/
+sample/
+.DS_Store
+report
+temp
+*.log
+*.iml
+doc
+.idea/
+dist
+comment
