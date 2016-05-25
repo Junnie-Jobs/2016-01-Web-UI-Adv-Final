@@ -26,17 +26,13 @@ gulp.task('compress', ['js-compress','css-compress'],function(){
 
 });
 gulp.task('default',['js-compress','css-compress', 'concat'], function() {
-	//js에 변경이 생길때마다 concat을 실행시킴
+
   	gulp.watch("./js/*.js", ['concat']).on("change",function(){
-        // browserSync.reload();
+
     });
     gulp.watch("./js/*.js",['jscs'].on("change",function () {
 
     }))
-});
-
-gulp.task('concat', ['js-concat','css-concat'],function(){
-
 });
 
 gulp.task('js-concat', function() {
