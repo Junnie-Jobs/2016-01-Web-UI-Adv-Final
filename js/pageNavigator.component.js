@@ -16,7 +16,7 @@ define(['jquery','eventEmitter'],function($, EventEmitter){
 
 		init : function () {
 		    this.setPageNum(this.pageIndexInit);
-		    this.setBeforeAfterArrowIfNeeded();
+		    this.setPrevNextArrow();
 		    this.pageNavaigator.on('click', 'a', $.proxy(this, 'pageMove'));
   		},
 
@@ -32,11 +32,10 @@ define(['jquery','eventEmitter'],function($, EventEmitter){
 		},
 
 		setPrevNextArrow: function () {
-	    this.pageNavaigator.find('li:first').addClass('prev');
-	    this.pageNavaigator.find('li:last').addClass('next');
-	    this.prevArrow = $('.pageNavaigator .prev').find('a').text('<');
-	    this.nextArrow = $('.pageNavaigator .next').find('a').text('>');
-  		
+		    this.pageNavaigator.find('li:first').addClass('prev');
+		    this.pageNavaigator.find('li:last').addClass('next');
+		    this.prevArrow = $('.pageNavaigator .prev').find('a').text('<');
+		    this.nextArrow = $('.pageNavaigator .next').find('a').text('>');	  		
   		},		
 
   		pageMove: function (e) {
@@ -71,7 +70,7 @@ define(['jquery','eventEmitter'],function($, EventEmitter){
 		      this.nextArrow.removeClass('disabled');
 		    }
 
-		    if (selectedIndex === (1 + (this.maxPageNum - 1))) { 
+		    if (selectedIndex === this.maxPageNum) { 
 		      this.nextArrow.addClass('disabled');
 		      this.prevArrow.removeClass('disabled');
 		    }
