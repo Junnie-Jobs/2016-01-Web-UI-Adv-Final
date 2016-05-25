@@ -61,7 +61,7 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
         $(".pageNavigator li:contains('1')").addClass("selected");
     }
  
-    //카운트를 세고 페이지 인덱스를 만들어준다.
+
     function pageViewResolver(Idx){
 
         var pageNum;
@@ -122,21 +122,7 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
 
             clickPrevResolver(clikedPage);
         }
-
-      
             clickPrevResolver(clikedPage);
-    
-     
-
-        // if(clikedPage <= 5 ){  
-        //     clickPrevResolver(clikedPage);
-        // }
-         
-
-        // if(clikedPage > 5 && clikedPage%5 === 1){
-
-        //     clickPrevResolver(clikedPage)
-        // }     
     }
 
     function clickPrevResolver(clikedPage){
@@ -188,20 +174,14 @@ define(["handlebars","jquery", "template", "todo"], function (Handlebars,$, temp
 
     function clickNextResolver(newPage){
 
-        console.log("여기서 bewPage" + newPage);
         $(".selected").removeClass("selected");
         $("#prev").removeClass("disabled");
-         // var a = $(".pageNavigator").find(".pageIndex").first().text();
         
         if(newPage > 5 && newPage%5 === 1 ){
             $(".pageNavigator").find("li:nth-child(2)").addClass("selected");
         }else{
              $(".pageNavigator").find("li").eq(newPage).addClass("selected");
         }
-
-         // $(".pageNavigator").find("li").eq(newPage).addClass("selected");
-       
-
        
         pageViewResolver(newPage);
     }
