@@ -1,48 +1,50 @@
 var gulp = require('gulp');
+var webserver = require('gulp-webserver');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
-var concatCss = require('gulp-concat-css');
-var jscs = require('gulp-jscs');
+var minifyhtml = require('gulp-minify-html');
+var sass = require('gulp-sass');
+var livereload = require('gulp-livereload');
 
-gulp.task('jscs', () => {
-    return gulp.src('./js/*.js')
-        .pipe(jscs())
-        .pipe(jscs.reporter());
+gulp.src('static_resources/js/*.js')
+	.pipe(uglify())
+	.pipe(concat('script.js'))
+	.pipe(gulp.dest('dist/js'));
+	
+	
+// 웹서버를 localhost:8000 로 실행한다.
+gulp.task('server', function () {
+	return gulp.src(dist + '/')
+		.pipe(webserver());
+});
+	
+// 자바스크립트 파일을 하나로 합치고 압축한다.
+gulp.task('combine-js', function () {
+	return gulp.src(paths.js)
+		.pipe(concat('script.js'))
+		.pipe(uglify())
+		.pipe(gulp.dest(dist + '/js'));
 });
 
-gulp.task('js-compress', function() {
-  return gulp.src('dist/all.js')
-    .pipe(uglify())
-    .pipe(gulp.dest('dist'));
+// sass 파일을 css 로 컴파일한다.
+gulp.task('compile-sass', function () {
+	return gulp.src(paths.scss)
+		.pipe(sass())
+		.pipe(gulp.dest(dist + '/css'));
 });
 
-gulp.task('css-compress', function() {
-  return gulp.src('dist/*.css')
-    .pipe(uglify())
-    .pipe(gulp.dest('dist'));
+// HTML 파일을 압축한다.
+gulp.task('compress-html', function () {
+	return gulp.src(paths.html)
+		.pipe(minifyhtml())
+		.pipe(gulp.dest(dist + '/'));
 });
 
-gulp.task('compress', ['js-compress','css-compress'],function(){
-
-});
-gulp.task('default',['js-compress','css-compress', 'concat'], function() {
-
-  	gulp.watch("./js/*.js", ['concat']).on("change",function(){
-
-    });
-    gulp.watch("./js/*.js",['jscs'].on("change",function () {
-
-    }))
-});
-
-gulp.task('js-concat', function() {
-  return gulp.src('js/*.js')
-    .pipe(concat('all.js'))
-    .pipe(gulp.dest('./dist/'));
-});
-
-gulp.task('css-concat', function () {
-  return gulp.src('lib/*.css')
-    .pipe(concatCss("styles/bundle.css"))
-    .pipe(gulp.dest('dist'));
+// 파일 변경 감지 및 브라우저 재시작
+gulp.task('watch', function () {
+	livereload.listen();
+	gulp.watch(paths.js, ['combine-js']);
+	gulp.watch(paths.scss, ['compile-sass']);
+	gulp.watch(paths.html, ['compress-html']);
+	gulp.watch(dist + '/**').on('change', livereload.changed);
 });
